@@ -1,13 +1,12 @@
 #!/bin/sh
 set -e
 
-MITMPROXY_PATH="/home/mitmproxy/.mitmproxy"
-
-if [[ "$1" = "mitmdump" || "$1" = "mitmproxy" || "$1" = "mitmweb" ]]; then
-        mkdir -p "$MITMPROXY_PATH"
-        chown -R mitmproxy:mitmproxy "$MITMPROXY_PATH"
-
-        su-exec mitmproxy "$@"
-else
-        exec "$@"
+if ! whoami &> /dev/null; then
+  if [ -w /etc/passwd ]; then
+    echo "${USER_NAME:-mitmproxy}:x:$(id -u):0:${USER_NAME:-mitmproxy} user:${HOME}:/sbin/nologin" >> /etc/passwd
+  fi
 fi
+
+MITMPROXY_PATH="$HOME/.mitmproxy"
+
+exec "$@"
